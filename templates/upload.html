@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload de PDF</title>
+</head>
+<body>
+    <h1>Upload de PDF</h1>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul class="flashes">
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+    <form method="POST" action="/upload" enctype="multipart/form-data">
+        <input type="file" name="pdf_file">
+        <input type="submit" value="Enviar">
+    </form>
+
+    <h2>Páginas processadas com sucesso: {{ successful_count }}</h2>
+    <h2>Páginas com erro: {{ failed_count }}</h2>
+
+    {% if failed_count > 0 %}
+    <form method="POST" action="/retry_failed">
+        <input type="submit" value="Revisar páginas com erro">
+    </form>
+    {% endif %}
+</body>
+</html>
+
+
+
+

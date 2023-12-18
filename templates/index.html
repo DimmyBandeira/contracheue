@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Página de Upload</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Upload de PDF e Exibição de Tabelas</h1>
+        <form method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="file">Selecione um arquivo PDF</label>
+                <input type="file" class="form-control-file" name="file" id="file" accept=".pdf">
+            </div>
+            <button type="submit" class="btn btn-primary">Enviar PDF</button>
+        </form>
+        <div id="progress" class="mt-4">
+            <progress id="progress-bar" max="100" class="w-100"></progress>
+            <p id="progress-text" class="text-center mt-2">Aguardando início do processo...</p>
+        </div>
+        <div id="resultContainer" class="mt-4">
+            <!-- Resultados serão exibidos aqui -->
+        </div>
+    </div>
+
+    <!-- Modal de Conclusão -->
+    <div class="modal" id="completionModal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Concluído</h5>
+                </div>
+                <div class="modal-body">
+                    <p id="resultText">Processo concluído com sucesso!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts do Bootstrap -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        // Variável global para verificar se o processo está concluído
+        var processoConcluido = false;
+
+        // Função para exibir o modal "Concluído" e atualizar os resultados
+        function exibirModalConcluido(resultText) {
+            $('#resultText').text(resultText);
+            $('#completionModal').modal('show');
+
+            // Fechar o modal automaticamente após 3 segundos (ajuste conforme necessário)
+            setTimeout(function () {
+                $('#completionModal').modal('hide');
+            }, 3000);
+
+            // Marcar o processo como concluído
+            processoConcluido = true;
+        }
+
+        // Função para verificar o status do processo e exibir o modal quando estiver concluído
+        function verificarStatusProcesso() {
+            if (processoConcluido) {
+                exibirModalConcluido("Processo concluído com sucesso!");
+            } else {
+                // Aguarde 1 segundo e verifique novamente
+                setTimeout(verificarStatusProcesso, 1000);
+            }
+        }
+
+        // Chame a função verificarStatusProcesso após o envio do arquivo
+        verificarStatusProcesso();
+    </script>
+</body>
+</html>
+
+
+

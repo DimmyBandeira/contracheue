@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lista de Funcionários</title>
+</head>
+<body>
+    <h1>Lista de Funcionários</h1>
+    
+    <!-- Aqui você pode exibir o valor de failed_count -->
+    <p>Número de funcionários com PDFs ausentes: {{ failed_count }}</p>
+
+    <table>
+        <tr>
+            <th>Nome</th>
+            <th>Registro</th>
+            <th>PDF Path</th>
+        </tr>
+        {% for employee in employees %}
+        <tr>
+            <td>{{ employee.name }}</td>
+            <td>{{ employee.registration }}</td>
+            <td>{{ employee.pdf_path }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
+
+
+
