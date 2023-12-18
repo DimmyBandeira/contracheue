@@ -35,12 +35,12 @@ def convert_all_pdfs():
             # Para cada arquivo PDF, inicie uma thread de conversão
             for pdf_filename in pdf_files:
                 pdf_path = os.path.join(pdf_directory, pdf_filename)
-                pdf = PdfFileReader(open(pdf_path, 'rb'))
-                
-                for page_number in range(pdf.getNumPages()):
-                    csv_filename = os.path.join(temp_dir, f'{pdf_filename}_page_{page_number + 1}.csv')
-                    convert_page_to_csv(pdf_path, page_number + 1, csv_filename)
-                    pbar.update(1)
+                with open(pdf_path, 'rb') as file:
+                    pdf = PdfFileReader(file)
+                    for page_number in range(pdf.getNumPages()):
+                        csv_filename = os.path.join(temp_dir, f'{pdf_filename}_page_{page_number + 1}.csv')
+                        convert_page_to_csv(pdf_path, page_number + 1, csv_filename)
+                        pbar.update(1)
 
             pbar.close()
 
@@ -51,10 +51,18 @@ def convert_all_pdfs():
             
             # Abra o CSV e leia a linha 8
             with open(csv_filename, 'r', encoding='utf-8') as csv_file:
-                line_8 = csv_file.readlines()[7]  # Lê a linha 8 (índice 7)
+                lines = csv_file.readlines()
+                csv_file.close()
 
+            line_8 = lines[7].replace('\n', '')  # Lê a linha 8 (índice 7)
+            line_2 = lines[1].replace('\n', '')
+            if(pdf_path.__contains__('_9')):
+                print('chegou')
             # Obtenha os três primeiros caracteres da linha 8
-            new_name = line_8.strip()[:3]
+            ano = line_2.split(',')[1].split(' ')[2]
+            mes = buscarNumeroMes(line_2.split(',')[1].split(' ')[0])
+            id_usuario = line_8.split(' ')[0]
+            new_name = ano + mes + id_usuario
 
             # Renomeie o arquivo PDF
             new_pdf_filename = f'{new_name}.pdf'
@@ -73,3 +81,31 @@ if __name__ == '__main__':
     else:
         print('Erro ao processar os PDFs')
 
+
+def buscarNumeroMes(nomeMes):
+    if nomeMes == 'Janeiro':
+        return '01'
+    elif nomeMes == 'Fevereiro':
+        return '02'
+    elif nomeMes == 'Março':
+        return '03'
+    elif nomeMes == 'Abril':
+        return '04'
+    elif nomeMes == 'Maio':
+        return '05'
+    elif nomeMes == 'Junho':
+        return '06'
+    elif nomeMes == 'Julho':
+        return '07'
+    elif nomeMes == 'Agosto':
+        return '08'
+    elif nomeMes == 'Setembro':
+        return '09'
+    elif nomeMes == 'Outubro':
+        return '10'
+    elif nomeMes == 'Novembro':
+        return '11'
+    elif nomeMes == 'Dezembro':
+        return '12'
+    else:
+        return '00'

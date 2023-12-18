@@ -1,8 +1,13 @@
 import os
+import shutil
+
 from PyPDF2 import PdfFileReader, PdfFileWriter
 from flask import Flask, render_template, request, jsonify, Response
 import threading
 import time
+
+from conversor_pdf_csv import convert_all_pdfs
+from save_pdf_idbanco import save_pdfs_to_database
 
 app = Flask(__name__)
 
@@ -10,10 +15,12 @@ app = Flask(__name__)
 progresso_atual = 0
 processo_concluido = False
 
+
 def count_pdf_pages(input_pdf_path):
     with open(input_pdf_path, 'rb') as pdf_file:
         pdf_reader = PdfFileReader(pdf_file)
         return pdf_reader.getNumPages()
+
 
 def split_pdf_pages(input_pdf_path, output_directory, progress_callback):
     global progresso_atual  # Referência à variável global
@@ -37,17 +44,20 @@ def split_pdf_pages(input_pdf_path, output_directory, progress_callback):
 
             # Atualizar o progresso com base no número de páginas processadas e no total de páginas
             progresso_atual = (page_number + 1) / total_pages * 100
-            progress_callback(progresso_atual)
+            if (progress_callback is not None):
+                progress_callback(progresso_atual)
 
     print(f"{total_pages} páginas do PDF separadas e salvas em {output_directory}")
 
     # Quando o processo estiver concluído, defina a variável global como True
     processo_concluido = True
 
+
 def send_progress(progress_callback):
     while progresso_atual < 100:
         progress_callback(progresso_atual)
         time.sleep(1)
+
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -64,7 +74,8 @@ def index():
             def progress_callback(progress):
                 return progress
 
-            progress_thread = threading.Thread(target=split_pdf_pages, args=(temp_pdf, output_directory, progress_callback))
+            progress_thread = threading.Thread(target=split_pdf_pages,
+                                               args=(temp_pdf, output_directory, progress_callback))
             progress_thread.start()
 
             progress_sender_thread = threading.Thread(target=send_progress, args=(progress_callback,))
@@ -74,6 +85,7 @@ def index():
 
     return render_template("index.html", processo_concluido=processo_concluido)
 
+
 @app.route("/progress")
 def progress():
     def generate():
@@ -81,11 +93,18 @@ def progress():
             yield f"data: {progresso_atual}\n\n"
             time.sleep(1)
         yield "data: 100\n\n"
-    
+
     return Response(generate(), mimetype="text/event-stream")
+
+
+@app.route("/inserir", methods=["GET"])
+def inserirBanco():
+    split_pdf_pages('./temp.pdf', './pages/', None)
+    convert_all_pdfs()
+    save_pdfs_to_database(None)
+    shutil.rmtree('./pages')
+    shutil.rmtree('./temp_csv')
+
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-
-

@@ -13,13 +13,15 @@ db_config = {
 pdf_directory = 'pages'
 
 # Função para salvar os arquivos PDF no banco de dados
-def save_pdfs_to_database(db_config):
+def save_pdfs_to_database(config):
+    if(config is None):
+        config = db_config
     try:
         # Liste todos os arquivos PDF no diretório
         pdf_files = [f for f in os.listdir(pdf_directory) if f.endswith('.pdf')]
 
         # Criar uma conexão com o banco de dados
-        db = pymysql.connect(**db_config)
+        db = pymysql.connect(**config)
         cursor = db.cursor()
 
         # Para cada arquivo PDF, faça o seguinte:
@@ -27,15 +29,16 @@ def save_pdfs_to_database(db_config):
             pdf_path = os.path.join(pdf_directory, pdf_filename)
             
             # O nome do arquivo PDF (pdf_filename) já é o ID do usuário
-            user_id = pdf_filename.replace('.pdf', '')
+            pdf_id = pdf_filename.replace('.pdf', '')
+            user_id = pdf_id[6:]
 
             # Leia o conteúdo do arquivo PDF
             with open(pdf_path, 'rb') as pdf_file:
                 pdf_content = pdf_file.read()
 
             # Insira o conteúdo do PDF no banco de dados associado ao usuário
-            cursor.execute("INSERT INTO tabela_de_pdfs (id_usuario, conteudo_pdf) VALUES (%s, %s)",
-                           (user_id, pdf_content))
+            cursor.execute("INSERT INTO tabela_de_pdfs (id_pdf, id_usuario, conteudo_pdf) VALUES (%s, %s, %s)",
+                           (pdf_id, user_id, pdf_content))
             db.commit()
 
         # Feche a conexão com o banco de dados

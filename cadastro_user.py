@@ -12,7 +12,7 @@ db_config = {
 }
 
 # Rota para a página de cadastro de usuários
-@app.route('/cadastro', methods=['GET', 'POST'])
+app.route('/cadastro', methods=['GET', 'POST'])
 def cadastro():
     if request.method == 'POST':
         nome = request.form['nome']
